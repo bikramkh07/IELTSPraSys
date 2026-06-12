@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">IELTS UP icon</title>
+  <desc id="desc">Gradient IELTS UP monogram on a dark background.</desc>
+  <rect width="512" height="512" rx="96" fill="#05060a"/>
+  <circle cx="382" cy="130" r="54" fill="#0dd9c8" opacity="0.9"/>
+  <path d="M124 358V140h68v218h-68Zm104 0V140h71c62 0 101 34 101 88 0 55-39 89-101 89h-27v41h-44Zm44-97h26c23 0 36-12 36-32 0-21-13-33-36-33h-26v65Z" fill="#f0f2ff"/>
+  <path d="M116 386h280" stroke="#6c63ff" stroke-width="28" stroke-linecap="round"/>
+  <path d="M324 362l72 24-72 24" fill="none" stroke="#0dd9c8" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

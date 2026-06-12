@@ -2,11 +2,19 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useToast } from './Toast';
 
-const PASSAGE_TEXT = `Welcome to the Community Radio Station tour. My name is Sarah, and I'll be showing you around our facilities today. Our station was founded in 1998 by a group of local volunteers who wanted to give a voice to the community. Since then, we've grown considerably, and now we cover a radius of 30 kilometres, reaching over 50,000 listeners each week.
+const PASSAGE_TEXT = `Good morning, Riverside Health Club. My name is Jenny. How can I help you?
 
-If you're interested in volunteering with us, you'll need to commit to a minimum of 6 hours per week. Don't worry if you have no experience — we offer a comprehensive training course that lasts three weeks, covering everything from basic broadcasting techniques to interview skills.
+Hi, Jenny. I'm interested in joining the club. Could you give me some information about the membership options?
 
-Our main studio is located on the second floor of this building. It was recently refurbished with state-of-the-art equipment, including a professional mixing desk and sound-proof recording booths. Before you can start your first shift, all new volunteers must complete a security check — this is standard procedure for all broadcasting organisations.`;
+Of course. We have three types of membership. The basic plan costs 35 pounds per month, and that gives you access to the gym and the swimming pool. The standard plan is 52 pounds per month and includes all the basic facilities plus group fitness classes. And finally, the premium plan is 78 pounds per month, which gives you unlimited access to everything, including personal training sessions.
+
+That sounds good. I think the standard plan would suit me best. What are your opening hours?
+
+We're open from 6 in the morning until 10 at night on weekdays. On Saturdays we open at 8 and close at 8. And on Sundays we're open from 9 until 6 in the evening.
+
+Great. And is there a car park available?
+
+Yes, we have a free car park at the back of the building with space for 120 cars. We also have bicycle racks near the main entrance if you prefer to cycle.`;
 
 export default function ListeningModule() {
   const { showToast } = useToast();
@@ -87,20 +95,20 @@ export default function ListeningModule() {
   };
 
   return (
-    <div className="tab-content active" id="tab-listening" role="tabpanel">
+    <div className="tab-content active" id="panel-listening" role="tabpanel" aria-labelledby="tab-listening">
       <div className="listening-wrap">
         <div className="listening-header">
           <div>
-            <h3 className="listening-title">Listening — Section 2</h3>
-            <div className="listening-meta">Community Radio Station Tour · Questions 11–20</div>
+            <h3 className="listening-title">Listening — Section 1</h3>
+            <div className="listening-meta">Riverside Health Club Inquiry · Questions 1–10</div>
           </div>
-          <span className="listening-badge">Monologue · Intermediate</span>
+          <span className="listening-badge">Conversation · Beginner</span>
         </div>
 
         <div className="audio-player">
           <div className="audio-player-inner">
-            <button className="play-btn" onClick={togglePlay} aria-label={playing ? 'Pause audio' : 'Play audio'}>
-              <i className={playing ? 'ti ti-player-pause' : 'ti ti-player-play'} />
+            <button type="button" className="play-btn" onClick={togglePlay} aria-label={playing ? 'Pause audio' : 'Play audio'}>
+              <i className={playing ? 'ti ti-player-pause' : 'ti ti-player-play'} aria-hidden="true" />
             </button>
             <div className="audio-progress-wrap">
               <div className="audio-waveform">
@@ -122,8 +130,8 @@ export default function ListeningModule() {
             </div>
           </div>
           <div className="audio-tags">
-            <span className="audio-tag accent">Section 2</span>
-            <span className="audio-tag teal">Monologue</span>
+            <span className="audio-tag accent">Section 1</span>
+            <span className="audio-tag teal">Conversation</span>
             <span className="audio-tag gray">~1:05 min</span>
             <span className="audio-tag gray">British Accent</span>
           </div>
@@ -136,15 +144,15 @@ export default function ListeningModule() {
 
         <div className="listening-questions">
           <div className="lq-group">
-            <div className="lq-group-title">Questions 11–16: Complete the sentences</div>
+            <div className="lq-group-title">Questions 1–6: Complete the sentences</div>
             <div className="lq-grid">
               {[
-                { id: 'lq11', label: '11. The radio station was founded in', hint: 'the year', placeholder: 'e.g. 1994' },
-                { id: 'lq12', label: '12. The station covers a radius of', hint: 'km', placeholder: 'e.g. 50 km' },
-                { id: 'lq13', label: '13. Volunteers work a minimum of', hint: 'hours per week', placeholder: 'e.g. 4 hours' },
-                { id: 'lq14', label: '14. The training course lasts', hint: 'duration', placeholder: 'e.g. two days' },
-                { id: 'lq15', label: "15. The station's main studio is located on the", hint: 'floor', placeholder: 'e.g. third floor' },
-                { id: 'lq16', label: '16. New volunteers must complete a', hint: 'type of check', placeholder: 'e.g. background check' },
+                { id: 'lq1', label: '1. The basic membership costs', hint: 'price per month', placeholder: 'e.g. 25 pounds' },
+                { id: 'lq2', label: '2. The standard plan costs', hint: 'price per month', placeholder: 'e.g. 40 pounds' },
+                { id: 'lq3', label: '3. The premium plan includes', hint: 'special feature', placeholder: 'e.g. yoga classes' },
+                { id: 'lq4', label: '4. On weekdays the club opens at', hint: 'time', placeholder: 'e.g. 7 am' },
+                { id: 'lq5', label: '5. On Sundays the club closes at', hint: 'time', placeholder: 'e.g. 5 pm' },
+                { id: 'lq6', label: '6. The car park has space for', hint: 'number of cars', placeholder: 'e.g. 80 cars' },
               ].map((q) => (
                 <div className="lq-item" key={q.id}>
                   <label className="lq-label">{q.label} <span className="lq-blank-label">{q.hint}</span></label>
@@ -163,8 +171,8 @@ export default function ListeningModule() {
         </div>
 
         <div className="listening-footer">
-          <button className="btn-listen-submit" onClick={submitAnswers}><i className="ti ti-check" /> Submit All Answers</button>
-          <button className="btn-listen-next" onClick={() => showToast('Loading Section 3...')}>Next Section <i className="ti ti-arrow-right" /></button>
+          <button type="button" className="btn-listen-submit" onClick={submitAnswers}><i className="ti ti-check" aria-hidden="true" /> Submit All Answers</button>
+          <button type="button" className="btn-listen-next" onClick={() => showToast('Loading Section 2...')}>Next Section <i className="ti ti-arrow-right" aria-hidden="true" /></button>
         </div>
       </div>
     </div>

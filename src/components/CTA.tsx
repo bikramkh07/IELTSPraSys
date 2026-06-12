@@ -15,9 +15,6 @@ export default function CTA() {
   return (
     <div className="cta-section" id="cta">
       <div className="cta-inner">
-        <div className="cta-badge">
-          <span className="dot" /> 100% Free — Start Anytime
-        </div>
         <h2 className="cta-h2">
           Your Band 7+ Journey
           <br />
@@ -27,7 +24,7 @@ export default function CTA() {
           Practice IELTS - Speaking, Reading, Listening, Writing with AI tutor. Create your free account in 30 seconds.
         </p>
         <div className="cta-actions">
-          <button className="btn-hero" onClick={() => showToast('Welcome to IELTS UP! Setting up your profile... 🎯')}>
+          <button className="btn-hero" onClick={() => showToast('Welcome to IELTSPracSYS! Setting up your profile... 🎯')}>
             <i className="ti ti-rocket" /> Start Practicing
           </button>
           <button className="btn-hero-outline" onClick={() => scrollTo('modules')}>

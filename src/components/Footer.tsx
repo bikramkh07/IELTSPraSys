@@ -9,7 +9,7 @@ export default function Footer() {
     <footer>
       <div className="footer-inner">
         <div className="footer-brand">
-          <div className="footer-logo">IELTS UP</div>
+          <div className="footer-logo">IELTSPracSYS</div>
           <p className="footer-tagline">
             AI-powered IELTS preparation for the next generation of global citizens. Designed for Nepali students targeting Band 7+.
           </p>
@@ -47,7 +47,7 @@ export default function Footer() {
         </div>
       </div>
       <div className="footer-bottom">
-        <div className="footer-bottom-text">© 2025 IELTS UP · All rights reserved</div>
+        <div className="footer-bottom-text">© 2025 IELTSPracSYS · All rights reserved</div>
         <div className="footer-bottom-links">
           <a href="#" onClick={() => showToast('Privacy Policy...')}>Privacy Policy</a>
           <a href="#" onClick={() => showToast('Terms of Service...')}>Terms of Service</a>

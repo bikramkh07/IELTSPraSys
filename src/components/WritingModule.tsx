@@ -2,34 +2,32 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useToast } from './Toast';
 import MockFeedbackBanner from './MockFeedbackBanner';
-import { fetchWritingFeedback } from '@/lib/fetch-feedback';
+import { fetchWritingFeedback, saveScore } from '@/lib/fetch-feedback';
 import type { WritingFeedback } from '@/lib/api-response';
 
 const WRITING_PROMPTS = [
-  'Some people believe that governments should invest more in public transport, while others argue that private vehicle ownership should be encouraged. Discuss both views and give your own opinion.',
-  'In many countries, the proportion of older people is steadily increasing. What do you think are the positive and negative effects of this trend?',
-  'Some people think that children should begin their formal education at a very early age. Others believe they should not go to school until they are older. Discuss both views and give your own opinion.',
-  'Many cities around the world are growing very rapidly. What problems does rapid urbanisation bring, and what solutions can you suggest?',
-  'It is generally believed that some people are born with certain talents, while others are not. However, it is sometimes claimed that any child can be taught to become a good sports person or musician. Discuss both views and give your own opinion.',
-  'In some countries, more and more people are becoming interested in finding out about the history of the house or building they live in. What are the reasons for this? How might people research this?',
+  'The bar chart below shows the percentage of households with internet access in four different countries between 2005 and 2020. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
+  'The pie charts below show the main reasons why agricultural land becomes less productive in three regions of the world. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
+  'The line graph below shows the average daily temperatures in three major cities over a twelve-month period. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
+  'The table below gives information about the underground railway systems in six cities around the world. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
+  'The two maps below show a town centre before and after the construction of a new shopping centre. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
+  'The diagram below shows the process by which electricity is generated in a hydroelectric power station. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
 ];
 
-const SAMPLE_ESSAY = `Public transportation and private vehicle ownership represent two contrasting approaches to urban mobility, each with distinct advantages and limitations. In my view, a balanced approach is essential for sustainable development.
+const SAMPLE_ESSAY = `The bar chart illustrates the proportion of households that had access to the internet in four countries — the United States, Canada, Japan and Germany — over a fifteen-year period from 2005 to 2020.
 
-Those who advocate for greater investment in public transport argue that it is significantly more environmentally sustainable. Buses, trains and metro systems can transport hundreds of passengers simultaneously, thereby reducing carbon emissions per capita considerably. Furthermore, efficient metro systems, such as those in Tokyo and Singapore, dramatically reduce urban congestion and contribute to economic productivity by decreasing commute times.
+Overall, all four nations experienced a significant rise in internet access during this period. The United States and Canada consistently maintained the highest levels of connectivity, while Japan and Germany started from lower bases but showed substantial growth.
 
-On the other hand, proponents of private vehicle ownership emphasise the importance of individual freedom and flexibility. Personal vehicles allow people to travel at their own convenience, particularly in rural or suburban areas where public transport infrastructure is limited or entirely nonexistent. For many families, a car is not a luxury but a necessity for accessing employment, healthcare and education.
+In 2005, the United States led with approximately 62% of households connected, followed closely by Canada at 58%. By contrast, Japan and Germany had considerably lower rates of around 40% and 35% respectively.
 
-In my opinion, governments should prioritise investment in robust public transport systems while simultaneously implementing policies that discourage excessive private vehicle usage in urban centres. This dual strategy acknowledges both the environmental imperatives of our time and the practical realities faced by citizens in less connected regions.
-
-In conclusion, neither approach should be adopted exclusively. A pragmatic combination of improved public infrastructure and thoughtful regulation of private vehicles offers the most viable path toward sustainable and equitable urban mobility.`;
+By 2020, internet penetration had risen dramatically across all four countries. The United States reached 92%, while Canada followed at 90%. Japan showed the most rapid growth, climbing to 88%, nearly doubling its 2005 figure. Germany also increased significantly to 82%, though it remained the lowest among the four nations throughout the entire period.`;
 
 export default function WritingModule() {
   const { showToast } = useToast();
   const [prompt, setPrompt] = useState(WRITING_PROMPTS[0]);
   const [essay, setEssay] = useState('');
   const [wordCount, setWordCount] = useState(0);
-  const [seconds, setSeconds] = useState(2400);
+  const [seconds, setSeconds] = useState(1200);
   const [feedback, setFeedback] = useState<WritingFeedback | null>(null);
   const [loading, setLoading] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
@@ -51,6 +49,7 @@ export default function WritingModule() {
     try {
       const data = await fetchWritingFeedback(essay, prompt);
       setFeedback(data);
+      void saveScore('writing', data);
       const label = data.mock ? ' (sample)' : '';
       showToast(`Feedback ready! Overall Band: ${data.overall}${label} 📊`);
     } catch (err) {
@@ -87,7 +86,7 @@ export default function WritingModule() {
   const loadNewPrompt = () => {
     const others = WRITING_PROMPTS.filter((p) => p !== prompt);
     setPrompt(others[Math.floor(Math.random() * others.length)]);
-    setSeconds(2400);
+    setSeconds(1200);
     setFeedback(null);
     autoSubmittedRef.current = false;
     showToast('New prompt loaded! Timer reset. ✍️');
@@ -96,18 +95,18 @@ export default function WritingModule() {
   const loadSample = () => {
     setEssay(SAMPLE_ESSAY);
     setWordCount(SAMPLE_ESSAY.trim().split(/\s+/).length);
-    showToast('Sample essay loaded — 278 words ✅');
+    showToast('Sample response loaded — 168 words ✅');
   };
 
-  const wcColor = wordCount >= 250 ? 'var(--green)' : wordCount > 150 ? 'var(--gold)' : 'var(--text2)';
+  const wcColor = wordCount >= 150 ? 'var(--green)' : wordCount > 100 ? 'var(--gold)' : 'var(--text2)';
 
   return (
-    <div className="tab-content active" id="tab-writing" role="tabpanel">
+    <div className="tab-content active" id="panel-writing" role="tabpanel" aria-labelledby="tab-writing">
       <div className="exam-section">
         <div className="exam-topbar">
-          <div className="exam-type-badge"><div className="type-dot" /> Writing Task 2 — Academic</div>
+          <div className="exam-type-badge"><div className="type-dot" /> Writing Task 1 — Academic</div>
           <div className="exam-controls">
-            <button type="button" className="exam-new-btn" onClick={loadNewPrompt}><i className="ti ti-refresh" /> New Prompt</button>
+            <button type="button" className="exam-new-btn" onClick={loadNewPrompt}><i className="ti ti-refresh" aria-hidden="true" /> New Prompt</button>
             <div className="exam-timer" style={{ color: seconds < 300 ? 'var(--coral)' : 'var(--gold)' }}>{timeStr}</div>
           </div>
         </div>
@@ -115,21 +114,21 @@ export default function WritingModule() {
           <div className="writing-prompt">
             <div className="writing-prompt-label"><i className="ti ti-file-text" /> Task Prompt</div>
             <p>{prompt}</p>
-            <p className="prompt-note">Write at least 250 words · Recommended time: 40 minutes</p>
+            <p className="prompt-note">Write at least 150 words · Recommended time: 20 minutes</p>
           </div>
           <textarea
             className="writing-area"
             value={essay}
             onChange={(e) => handleEssayChange(e.target.value)}
-            placeholder={'Begin your essay here...\n\nThe AI examiner will evaluate your response across four IELTS writing criteria:\n• Task Achievement\n• Coherence & Cohesion\n• Lexical Resource\n• Grammatical Range & Accuracy'}
+            placeholder={'Begin your response here...\n\nThe AI examiner will evaluate your response across four IELTS writing criteria:\n• Task Achievement\n• Coherence & Cohesion\n• Lexical Resource\n• Grammatical Range & Accuracy'}
             aria-label="Essay writing area"
           />
           <div className="exam-footer">
-            <div className="word-count">Words: <span className="wc-num" style={{ color: wcColor }}>{wordCount}</span> <span className="wc-min">/ 250 minimum</span></div>
+            <div className="word-count">Words: <span className="wc-num" style={{ color: wcColor }}>{wordCount}</span> <span className="wc-min">/ 150 minimum</span></div>
             <div className="exam-footer-btns">
-              <button type="button" className="btn-load-sample" onClick={loadSample}><i className="ti ti-file-import" /> Load Sample</button>
+              <button type="button" className="btn-load-sample" onClick={loadSample}><i className="ti ti-file-import" aria-hidden="true" /> Load Sample</button>
               <button type="button" className="btn-get-feedback" onClick={() => void submitFeedback()} disabled={loading}>
-                <i className="ti ti-brain" /> {loading ? 'Analysing...' : 'Get AI Feedback'}
+                <i className="ti ti-brain" aria-hidden="true" /> {loading ? 'Analysing...' : 'Get AI Feedback'}
               </button>
             </div>
           </div>
@@ -138,7 +137,7 @@ export default function WritingModule() {
               <div className="ai-feedback-header">
                 <div className="ai-avatar"><i className="ti ti-robot" /></div>
                 <div><div className="ai-feedback-title">AI examiner Feedback</div><div className="ai-feedback-sub">IELTS Band Score Analysis</div></div>
-                <button type="button" className="close-feedback" onClick={() => setFeedback(null)}><i className="ti ti-x" /></button>
+                <button type="button" className="close-feedback" aria-label="Close writing feedback" onClick={() => setFeedback(null)}><i className="ti ti-x" aria-hidden="true" /></button>
               </div>
               {feedback.mock && <MockFeedbackBanner />}
               <div className="ai-scores-row">

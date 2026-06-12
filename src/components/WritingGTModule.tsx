@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useToast } from './Toast';
 import MockFeedbackBanner from './MockFeedbackBanner';
-import { fetchWritingFeedback } from '@/lib/fetch-feedback';
+import { fetchWritingFeedback, saveScore } from '@/lib/fetch-feedback';
 import type { WritingFeedback } from '@/lib/api-response';
 
 const WRITING_PROMPTS = [
@@ -53,6 +53,7 @@ export default function WritingGTModule() {
     try {
       const data = await fetchWritingFeedback(essay, prompt);
       setFeedback(data);
+      void saveScore('writing', data);
       const label = data.mock ? ' (sample)' : '';
       showToast(`Feedback ready! Overall Band: ${data.overall}${label} 📊`);
     } catch (err) {
@@ -104,12 +105,12 @@ export default function WritingGTModule() {
   const wcColor = wordCount >= 150 ? 'var(--green)' : wordCount > 100 ? 'var(--gold)' : 'var(--text2)';
 
   return (
-    <div className="tab-content active" id="tab-writing-gt" role="tabpanel">
+    <div className="tab-content active" id="panel-writing-gt" role="tabpanel">
       <div className="exam-section">
         <div className="exam-topbar">
           <div className="exam-type-badge"><div className="type-dot" /> Writing Task 1 — General Training</div>
           <div className="exam-controls">
-            <button className="exam-new-btn" onClick={loadNewPrompt}><i className="ti ti-refresh" /> New Prompt</button>
+            <button type="button" className="exam-new-btn" onClick={loadNewPrompt}><i className="ti ti-refresh" aria-hidden="true" /> New Prompt</button>
             <div className="exam-timer" style={{ color: seconds < 300 ? 'var(--coral)' : 'var(--gold)' }}>{timeStr}</div>
           </div>
         </div>
@@ -129,9 +130,9 @@ export default function WritingGTModule() {
           <div className="exam-footer">
             <div className="word-count">Words: <span className="wc-num" style={{ color: wcColor }}>{wordCount}</span> <span className="wc-min">/ 150 minimum</span></div>
             <div className="exam-footer-btns">
-              <button className="btn-load-sample" onClick={loadSample}><i className="ti ti-file-import" /> Load Sample</button>
+              <button type="button" className="btn-load-sample" onClick={loadSample}><i className="ti ti-file-import" aria-hidden="true" /> Load Sample</button>
               <button type="button" className="btn-get-feedback" onClick={() => void submitFeedback()} disabled={loading}>
-                <i className="ti ti-brain" /> {loading ? 'Analysing...' : 'Get AI Feedback'}
+                <i className="ti ti-brain" aria-hidden="true" /> {loading ? 'Analysing...' : 'Get AI Feedback'}
               </button>
             </div>
           </div>
@@ -140,7 +141,7 @@ export default function WritingGTModule() {
               <div className="ai-feedback-header">
                 <div className="ai-avatar"><i className="ti ti-robot" /></div>
                 <div><div className="ai-feedback-title">AI examiner Feedback</div><div className="ai-feedback-sub">IELTS Band Score Analysis</div></div>
-                <button type="button" className="close-feedback" onClick={() => setFeedback(null)}><i className="ti ti-x" /></button>
+                <button type="button" className="close-feedback" aria-label="Close writing feedback" onClick={() => setFeedback(null)}><i className="ti ti-x" aria-hidden="true" /></button>
               </div>
               {feedback.mock && <MockFeedbackBanner />}
               <div className="ai-scores-row">

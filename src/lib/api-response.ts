@@ -1,3 +1,5 @@
+import { coerceBandScore } from './validators';
+
 export interface WritingFeedback {
   ta: number;
   cc: number;
@@ -33,11 +35,11 @@ export function parseWritingFeedback(raw: unknown, mock = false): WritingFeedbac
     : DEFAULT_IMPROVEMENTS;
 
   return {
-    ta: Number(data.ta) || 6.5,
-    cc: Number(data.cc) || 7.0,
-    lr: Number(data.lr) || 6.5,
-    gra: Number(data.gra) || 7.0,
-    overall: Number(data.overall) || 6.5,
+    ta: coerceBandScore(data.ta, 6.5),
+    cc: coerceBandScore(data.cc, 7.0),
+    lr: coerceBandScore(data.lr, 6.5),
+    gra: coerceBandScore(data.gra, 7.0),
+    overall: coerceBandScore(data.overall, 6.5),
     feedback: typeof data.feedback === 'string' ? data.feedback : 'Feedback unavailable.',
     improvements: improvements.length ? improvements : DEFAULT_IMPROVEMENTS,
     mock,
@@ -51,11 +53,11 @@ export function parseSpeakingFeedback(raw: unknown, mock = false): SpeakingFeedb
       typeof data.transcript === 'string'
         ? data.transcript
         : 'Transcription unavailable.',
-    fluency: Number(data.fluency) || 6.5,
-    vocabulary: Number(data.vocabulary) || 7.0,
-    grammar: Number(data.grammar) || 6.5,
-    pronunciation: Number(data.pronunciation) || 6.0,
-    overall: Number(data.overall) || 6.5,
+    fluency: coerceBandScore(data.fluency, 6.5),
+    vocabulary: coerceBandScore(data.vocabulary, 7.0),
+    grammar: coerceBandScore(data.grammar, 6.5),
+    pronunciation: coerceBandScore(data.pronunciation, 6.0),
+    overall: coerceBandScore(data.overall, 6.5),
     feedback: typeof data.feedback === 'string' ? data.feedback : 'Feedback unavailable.',
     mock,
   };

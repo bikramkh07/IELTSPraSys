@@ -11,10 +11,6 @@ export default function Hero() {
         <div className="hero-grid" />
       </div>
       <div className="hero-inner">
-        <div className="hero-badge">
-          <span className="dot" />
-          100% Free — Start Anytime
-        </div>
         <h1 className="hero-h1">
           Your Band 7+ Journey
           <br />

@@ -2,7 +2,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { useToast } from './Toast';
 import MockFeedbackBanner from './MockFeedbackBanner';
-import { fetchSpeakingFeedback } from '@/lib/fetch-feedback';
+import { fetchSpeakingFeedback, saveScore } from '@/lib/fetch-feedback';
 import {
   extensionForMime,
   getSupportedAudioMimeType,
@@ -43,6 +43,7 @@ export default function SpeakingModule() {
           const ext = extensionForMime(blob.type);
           const data = await fetchSpeakingFeedback(blob, `recording.${ext}`);
           setFeedback(data);
+          void saveScore('speaking', data);
           const label = data.mock ? ' (sample)' : '';
           showToast(`Speaking score ready! Overall: ${data.overall}${label} 🎤`);
         } catch (err) {
@@ -69,7 +70,12 @@ export default function SpeakingModule() {
   }, []);
 
   const toggleMic = () => {
-    recording ? stopRecording() : void startRecording();
+    if (recording) {
+      stopRecording();
+      return;
+    }
+
+    void startRecording();
   };
 
   const scores = feedback
@@ -102,7 +108,7 @@ export default function SpeakingModule() {
     : [];
 
   return (
-    <div className="tab-content active" id="tab-speaking" role="tabpanel">
+    <div className="tab-content active" id="panel-speaking" role="tabpanel" aria-labelledby="tab-speaking">
       <div className="speaking-wrap">
         <div className="speak-card">
           <h3><i className="ti ti-microphone" style={{ color: 'var(--coral)' }} /> AI Speaking Session</h3>
@@ -125,7 +131,7 @@ export default function SpeakingModule() {
                     : 'linear-gradient(135deg, var(--coral), #e53e3e)',
                 }}
               >
-                <i className={recording ? 'ti ti-player-stop' : 'ti ti-microphone'} />
+                <i className={recording ? 'ti ti-player-stop' : 'ti ti-microphone'} aria-hidden="true" />
               </button>
             </div>
             <div className={`wave-bar-wrap${recording ? '' : ' paused'}`} id="waveWrap" aria-hidden="true">
@@ -156,8 +162,8 @@ export default function SpeakingModule() {
                   <div className="ai-feedback-title">AI Speaking Feedback</div>
                   <div className="ai-feedback-sub">Transcript & Score</div>
                 </div>
-                <button type="button" className="close-feedback" onClick={() => setFeedback(null)}>
-                  <i className="ti ti-x" />
+                <button type="button" className="close-feedback" aria-label="Close speaking feedback" onClick={() => setFeedback(null)}>
+                  <i className="ti ti-x" aria-hidden="true" />
                 </button>
               </div>
               {feedback.mock && <MockFeedbackBanner />}
@@ -233,4 +239,3 @@ export default function SpeakingModule() {
     </div>
   );
 }
-

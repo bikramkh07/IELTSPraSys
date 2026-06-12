@@ -1,6 +1,6 @@
 {
-  "name": "BandUp AI — IELTS Band 7+ Academy",
-  "short_name": "BandUp AI",
+  "name": "IELTSPracSYS — IELTS Band 7+ Academy",
+  "short_name": "IELTSPracSYS",
   "description": "AI-powered IELTS preparation platform for Band 7+ success. Practice speaking, writing, reading and listening with your personal AI Examiner.",
   "start_url": "/",
   "display": "standalone",
@@ -94,14 +94,14 @@
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "BandUp AI Desktop Dashboard"
+      "label": "IELTSPracSYS Desktop Dashboard"
     },
     {
       "src": "screenshots/mobile.png",
       "sizes": "390x844",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "BandUp AI Mobile View"
+      "label": "IELTSPracSYS Mobile View"
     }
   ]
 }

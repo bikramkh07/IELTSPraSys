@@ -1,12 +1,24 @@
 'use client';
 import { useEffect, useState, useCallback } from 'react';
-import { useToast } from './Toast';
 
 const DASH_DATA: Record<string, { band: string; sub: string; offset: number }> = {
   overall: { band: '6.5', sub: '+0.5 this month ↑', offset: 68 },
   weekly: { band: '6.0', sub: '+0.5 this week ↑', offset: 102 },
   monthly: { band: '5.5', sub: '30-day baseline', offset: 136 },
 };
+
+type StoredScore = {
+  module: string;
+  overall: number;
+};
+
+function formatBand(value: number | undefined, fallback: string) {
+  return typeof value === 'number' && Number.isFinite(value) ? value.toFixed(1) : fallback;
+}
+
+function ringOffset(value: number) {
+  return Math.max(0, 340 - (value / 9) * 340);
+}
 
 function Sparkline({ id, data, gradient }: { id: string; data: number[]; gradient: string }) {
   const max = Math.max(...data);
@@ -35,9 +47,57 @@ function StreakRow() {
 
 export default function Dashboard() {
   const [tab, setTab] = useState('overall');
-  const d = DASH_DATA[tab];
+  const [scores, setScores] = useState<StoredScore[]>([]);
+  const [scoresLoading, setScoresLoading] = useState(true);
+  const latestScore = scores[0];
+  const d =
+    tab === 'overall' && latestScore
+      ? {
+          band: formatBand(latestScore.overall, DASH_DATA.overall.band),
+          sub: 'Latest saved AI score',
+          offset: ringOffset(latestScore.overall),
+        }
+      : DASH_DATA[tab];
 
   const switchTab = useCallback((t: string) => setTab(t), []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadScores() {
+      try {
+        const res = await fetch('/api/scores?limit=20');
+        const data = await res.json();
+        if (!cancelled && Array.isArray(data.scores)) {
+          setScores(
+            data.scores.filter(
+              (score: unknown): score is StoredScore =>
+                !!score &&
+                typeof score === 'object' &&
+                typeof (score as StoredScore).module === 'string' &&
+                typeof (score as StoredScore).overall === 'number',
+            ),
+          );
+        }
+      } catch {
+        if (!cancelled) setScores([]);
+      } finally {
+        if (!cancelled) setScoresLoading(false);
+      }
+    }
+
+    void loadScores();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const scoreFor = useCallback(
+    (module: string, fallback: string) =>
+      formatBand(scores.find((score) => score.module === module)?.overall, fallback),
+    [scores],
+  );
 
   return (
     <section className="content-section" id="progress">
@@ -48,8 +108,8 @@ export default function Dashboard() {
       <div className="progress-grid">
         <div className="prog-card">
           <div className="prog-label">Current Band</div>
-          <div className="prog-val" style={{ color: 'var(--accent3)' }}>6.5</div>
-          <div className="prog-note">Target: Band 7.5 · 28 days left</div>
+          <div className="prog-val" style={{ color: 'var(--accent3)' }}>{formatBand(latestScore?.overall, '6.5')}</div>
+          <div className="prog-note">{scoresLoading ? 'Loading saved progress...' : 'Target: Band 7.5 · 28 days left'}</div>
           <Sparkline id="sparkline1" data={[5.0, 5.5, 5.5, 6.0, 6.0, 6.0, 6.5, 6.5]} gradient="linear-gradient(to top, var(--accent), var(--accent3))" />
         </div>
         <div className="prog-card">
@@ -60,8 +120,8 @@ export default function Dashboard() {
         </div>
         <div className="prog-card">
           <div className="prog-label">Sessions Done</div>
-          <div className="prog-val" style={{ color: 'var(--green)' }}>47</div>
-          <div className="prog-note">This month: 12 sessions</div>
+          <div className="prog-val" style={{ color: 'var(--green)' }}>{scores.length || 47}</div>
+          <div className="prog-note">{scores.length ? 'Saved AI feedback sessions' : 'This month: 12 sessions'}</div>
           <Sparkline id="sparkline2" data={[2, 4, 3, 5, 4, 6, 5, 7]} gradient="linear-gradient(to top, var(--teal), #5ffff5)" />
         </div>
         <div className="prog-card">
@@ -103,10 +163,10 @@ export default function Dashboard() {
               <div className="band-sub">{d.sub}</div>
             </div>
             <div className="skills-breakdown">
-              <div className="skill-item"><div className="skill-name"><i className="ti ti-microphone" style={{ fontSize: 12, color: 'var(--coral)' }} /> Speaking</div><div className="skill-score s-mid">6.5</div><div className="skill-bar"><div className="skill-bar-fill" style={{ width: '81%', background: 'linear-gradient(90deg,var(--coral),#ff8e8e)' }} /></div></div>
-              <div className="skill-item"><div className="skill-name"><i className="ti ti-pencil" style={{ fontSize: 12, color: 'var(--accent3)' }} /> Writing</div><div className="skill-score s-low">6.0</div><div className="skill-bar"><div className="skill-bar-fill" style={{ width: '75%', background: 'linear-gradient(90deg,var(--accent),var(--accent3))' }} /></div></div>
-              <div className="skill-item"><div className="skill-name"><i className="ti ti-headphones" style={{ fontSize: 12, color: 'var(--teal)' }} /> Listening</div><div className="skill-score s-high">7.0</div><div className="skill-bar"><div className="skill-bar-fill" style={{ width: '87%', background: 'linear-gradient(90deg,var(--teal),#5ffff5)' }} /></div></div>
-              <div className="skill-item"><div className="skill-name"><i className="ti ti-book" style={{ fontSize: 12, color: 'var(--gold)' }} /> Reading</div><div className="skill-score s-mid">6.5</div><div className="skill-bar"><div className="skill-bar-fill" style={{ width: '81%', background: 'linear-gradient(90deg,var(--gold),var(--gold2))' }} /></div></div>
+              <div className="skill-item"><div className="skill-name"><i className="ti ti-microphone" style={{ fontSize: 12, color: 'var(--coral)' }} /> Speaking</div><div className="skill-score s-mid">{scoreFor('speaking', '6.5')}</div><div className="skill-bar"><div className="skill-bar-fill" style={{ width: '81%', background: 'linear-gradient(90deg,var(--coral),#ff8e8e)' }} /></div></div>
+              <div className="skill-item"><div className="skill-name"><i className="ti ti-pencil" style={{ fontSize: 12, color: 'var(--accent3)' }} /> Writing</div><div className="skill-score s-low">{scoreFor('writing', '6.0')}</div><div className="skill-bar"><div className="skill-bar-fill" style={{ width: '75%', background: 'linear-gradient(90deg,var(--accent),var(--accent3))' }} /></div></div>
+              <div className="skill-item"><div className="skill-name"><i className="ti ti-headphones" style={{ fontSize: 12, color: 'var(--teal)' }} /> Listening</div><div className="skill-score s-high">{scoreFor('listening', '7.0')}</div><div className="skill-bar"><div className="skill-bar-fill" style={{ width: '87%', background: 'linear-gradient(90deg,var(--teal),#5ffff5)' }} /></div></div>
+              <div className="skill-item"><div className="skill-name"><i className="ti ti-book" style={{ fontSize: 12, color: 'var(--gold)' }} /> Reading</div><div className="skill-score s-mid">{scoreFor('reading', '6.5')}</div><div className="skill-bar"><div className="skill-bar-fill" style={{ width: '81%', background: 'linear-gradient(90deg,var(--gold),var(--gold2))' }} /></div></div>
             </div>
           </div>
           <div className="activity-panel">

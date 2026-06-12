@@ -22,7 +22,7 @@ export default function SignInPage() {
         <h1 style={{ fontSize: '1.5rem' }}>Sign-in not configured</h1>
         <p style={{ opacity: 0.8, maxWidth: 420 }}>
           Add <code>NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY</code> and{' '}
-          <code>CLERK_SECRET_KEY</code> in your Vercel project environment variables, then
+          <code>CLERK_SECRET_KEY</code> in your production environment variables, then
           redeploy.
         </p>
         <Link href="/" className="btn-primary">

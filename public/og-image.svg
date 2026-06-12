@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">IELTS UP platform preview</title>
+  <desc id="desc">IELTS UP AI-powered IELTS practice dashboard preview.</desc>
+  <rect width="1200" height="630" fill="#05060a"/>
+  <rect x="70" y="70" width="1060" height="490" rx="32" fill="#0d0f16" stroke="#ffffff24"/>
+  <circle cx="1010" cy="150" r="72" fill="#0dd9c8" opacity="0.2"/>
+  <circle cx="180" cy="470" r="90" fill="#6c63ff" opacity="0.18"/>
+  <text x="120" y="180" fill="#8b85ff" font-family="Arial, sans-serif" font-size="36" font-weight="700">IELTS UP</text>
+  <text x="120" y="270" fill="#f0f2ff" font-family="Arial, sans-serif" font-size="72" font-weight="800">AI IELTS Band 7+</text>
+  <text x="120" y="345" fill="#9ca3c2" font-family="Arial, sans-serif" font-size="34">Writing, speaking, reading and listening practice with AI feedback.</text>
+  <rect x="120" y="410" width="220" height="76" rx="16" fill="#6c63ff"/>
+  <text x="162" y="459" fill="#ffffff" font-family="Arial, sans-serif" font-size="26" font-weight="700">Practice now</text>
+  <rect x="770" y="245" width="245" height="245" rx="28" fill="#13161f" stroke="#ffffff24"/>
+  <circle cx="892" cy="348" r="78" fill="none" stroke="#202431" stroke-width="24"/>
+  <circle cx="892" cy="348" r="78" fill="none" stroke="#0dd9c8" stroke-width="24" stroke-dasharray="392 490" stroke-linecap="round"/>
+  <text x="842" y="366" fill="#fbbf24" font-family="Arial, sans-serif" font-size="54" font-weight="800">7.0</text>
+  <text x="812" y="440" fill="#9ca3c2" font-family="Arial, sans-serif" font-size="22">Band estimate</text>
+</svg>

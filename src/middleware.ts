@@ -1,6 +1,6 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import { hasClerk } from '@/lib/clerk-config';
+import { hasClerkAuth } from '@/lib/server-config';
 
 const isProtectedApi = createRouteMatcher([
   '/api/writing(.*)',
@@ -8,10 +8,13 @@ const isProtectedApi = createRouteMatcher([
   '/api/scores(.*)',
 ]);
 
-export default hasClerk
+export default hasClerkAuth
   ? clerkMiddleware(async (auth, req) => {
       if (isProtectedApi(req)) {
-        await auth.protect();
+        const { userId } = await auth();
+        if (!userId) {
+          return NextResponse.json({ error: 'Sign in required' }, { status: 401 });
+        }
       }
     })
   : () => NextResponse.next();

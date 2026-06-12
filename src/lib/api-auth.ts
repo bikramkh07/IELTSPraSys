@@ -1,13 +1,12 @@
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import { hasClerk } from '@/lib/clerk-config';
-import { prisma } from '@/lib/prisma';
+import { hasClerkAuth } from '@/lib/server-config';
 
 /** Returns Clerk user id, or null if auth is not configured. */
 export async function requireAuth(): Promise<
   { userId: string } | { error: NextResponse }
 > {
-  if (!hasClerk) {
+  if (!hasClerkAuth) {
     return { userId: 'anonymous' };
   }
 
@@ -23,6 +22,7 @@ export async function requireAuth(): Promise<
 
 /** Ensures a Prisma User row exists for the signed-in Clerk user. */
 export async function ensureDbUser(clerkId: string) {
+  const { prisma } = await import('@/lib/prisma');
   const clerkUser = await currentUser();
   const email =
     clerkUser?.emailAddresses.find((e) => e.id === clerkUser.primaryEmailAddressId)

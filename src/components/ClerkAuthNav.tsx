@@ -18,6 +18,9 @@ export default function ClerkAuthNav() {
       </SignedOut>
       <SignedIn>
         <UserButton afterSignOutUrl="/" />
+        <Link href="/dashboard" className="btn-primary">
+          Dashboard
+        </Link>
       </SignedIn>
     </>
   );

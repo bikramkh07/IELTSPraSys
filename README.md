@@ -1,205 +1,164 @@
-# BandUp AI — IELTS Band 7+ Academy
+# IELTSPracSYS
 
-AI-powered IELTS preparation platform. Practice speaking, writing, reading and listening with your personal AI Examiner — available 24/7.
+AI-powered IELTS practice app built with Next.js App Router, Clerk authentication, Gemini feedback, and Prisma/PostgreSQL score history.
 
----
+## Stack
 
-## 🚀 Quick Start
+- Next.js 15, React 19, TypeScript
+- Clerk for authentication
+- Google Gemini for writing and speaking feedback
+- Prisma with PostgreSQL for persisted score history
+- Node test runner for dependency-light unit, integration, and smoke tests
 
-### Option 1 — Open directly in browser
-Double-click `index.html` — the site runs with zero dependencies.
+## Setup
 
-### Option 2 — Local dev server (recommended)
+1. Install dependencies:
+
 ```bash
-# Using Python
-python -m http.server 3000
-
-# Using Node.js / npx
-npx serve .
-
-# Using VS Code
-# Install "Live Server" extension → Right-click index.html → Open with Live Server
-```
-Then open: http://localhost:3000
-
----
-
-## 📁 File Structure
-
-```
-bandup-ai/
-├── index.html          # Main HTML — all pages in one file
-├── styles.css          # Full production stylesheet (~900 lines)
-├── app.js              # Application logic, interactions, timers
-├── manifest.json       # PWA manifest (install to home screen)
-├── sw.js               # Service Worker (offline support, push notifications)
-├── README.md           # This file
-└── icons/              # PWA icons (generate at realfavicongenerator.net)
-    ├── icon-72.png
-    ├── icon-96.png
-    ├── icon-128.png
-    ├── icon-144.png
-    ├── icon-152.png
-    ├── icon-192.png
-    ├── icon-384.png
-    └── icon-512.png
+npm ci
 ```
 
----
+2. Create `.env.local` from `.env.local.example`.
 
-## ✨ Features
+Required for production:
 
-### Practice Modules
-| Module   | Features |
-|----------|----------|
-| ✍️ Writing | Live 40-min timer, 6 rotating prompts, word counter, AI band score feedback panel (TA / Coherence / Lexical / Grammar), sample essay loader |
-| 🎤 Speaking | Mic toggle with animated wave bars, Part 1–3 tracker, cue card display, speaking score breakdown |
-| 📖 Reading  | Passage + True/False/NG questions, instant answer checking, band score estimate |
-| 🎧 Listening | Audio player with waveform visualiser, fill-in-the-blank questions, answer submission |
-
-### Dashboard
-- Band score ring (animated SVG)
-- 4-skill breakdown with colour-coded progress bars
-- Sparkline charts (dynamic JS generation)
-- 14-day streak tracker
-- Today's AI-generated study plan
-- AI recommendation panel
-
-### UX / Design
-- Dark futuristic aesthetic (bg #05060a)
-- Syne 800 display font + DM Sans body
-- Animated orbs, dot-grid hero
-- Scroll-triggered fade-in animations (IntersectionObserver)
-- Sticky navbar with blur + scrolled state
-- Mobile-first responsive (hamburger menu, collapsible nav)
-- Toast notifications
-- FAQ accordion
-
-### PWA
-- `manifest.json` — installable on home screen
-- `sw.js` — cache-first offline support
-- Push notification scaffolding for study reminders
-
----
-
-## 🔧 Upgrade to Full Production Stack
-
-This is a complete static frontend. To add real AI and authentication:
-
-### 1. Framework
-```bash
-npx create-next-app@latest bandup-ai --typescript --tailwind --app
-```
-
-### 2. AI Integration
-```bash
-npm install openai
-```
-```ts
-// app/api/writing/route.ts
-import OpenAI from 'openai';
-const client = new OpenAI();
-
-export async function POST(req: Request) {
-  const { essay, prompt } = await req.json();
-  const res = await client.chat.completions.create({
-    model: 'gpt-4o',
-    messages: [{
-      role: 'system',
-      content: `You are an expert IELTS Examiner. Score this essay on Task Achievement,
-                Coherence & Cohesion, Lexical Resource, and Grammatical Range & Accuracy.
-                Return JSON: { ta, cc, lr, gra, overall, feedback, improvements[] }`
-    }, {
-      role: 'user',
-      content: `Prompt: ${prompt}\n\nEssay: ${essay}`
-    }],
-    response_format: { type: 'json_object' }
-  });
-  return Response.json(JSON.parse(res.choices[0].message.content));
-}
-```
-
-### 3. Speech Recognition (Speaking)
-```bash
-npm install openai
-```
-```ts
-// app/api/speaking/route.ts
-export async function POST(req: Request) {
-  const form = await req.formData();
-  const audio = form.get('audio') as File;
-  const transcript = await openai.audio.transcriptions.create({
-    file: audio,
-    model: 'whisper-1',
-    language: 'en',
-  });
-  // then send transcript to GPT for IELTS scoring
-}
-```
-
-### 4. Authentication
-```bash
-npm install @clerk/nextjs
-```
-
-### 5. Database
-```bash
-npm install prisma @prisma/client
-npx prisma init
-```
-
-### 6. Recommended `.env.local`
 ```env
-OPENAI_API_KEY=sk-...
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_...
-CLERK_SECRET_KEY=sk_...
-DATABASE_URL=postgresql://...
-NEXT_PUBLIC_SUPABASE_URL=https://...
-NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+NEXT_PUBLIC_APP_URL=https://your-domain.com
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_live_...
+CLERK_SECRET_KEY=sk_live_...
+GEMINI_API_KEY=...
+DATABASE_URL=postgresql://USER:PASSWORD@HOST:5432/ielts_up?sslmode=require
 ```
 
----
+Optional:
 
-## 🌍 Deployment (Vercel)
+```env
+NEXT_PUBLIC_ENABLE_WEB_VITALS=true
+```
+
+3. Validate Prisma and run migrations:
 
 ```bash
-# Install Vercel CLI
-npm i -g vercel
-
-# Deploy
-vercel --prod
+npx prisma validate
+npm run db:deploy
 ```
 
-Or connect your GitHub repo at vercel.com — auto-deploys on every push.
+4. Start local development:
 
----
-
-## 🎨 Design Tokens
-
-```css
---bg:      #05060a   /* deep space black */
---accent:  #6c63ff   /* electric purple */
---teal:    #0dd9c8   /* AI cyan */
---gold:    #f59e0b   /* amber alerts */
---coral:   #ff6b6b   /* speaking red */
---green:   #22c55e   /* success green */
+```bash
+npm run dev
 ```
 
-Fonts: **Syne 800** (headings) · **DM Sans** (body)
+## API
 
----
+### `POST /api/writing`
 
-## 📱 PWA Icons
+Returns IELTS writing feedback.
 
-Generate all required icon sizes at:
-https://realfavicongenerator.net
+Body:
 
-Place the exported icons in the `/icons/` folder.
+```json
+{
+  "prompt": "Discuss both views and give your opinion.",
+  "essay": "At least 50 words..."
+}
+```
 
----
+Validation:
 
-## 📄 License
+- Essay and prompt are required.
+- Essay minimum: 50 words.
+- Essay maximum: 12,000 characters.
+- Prompt maximum: 2,000 characters.
+- Same-origin browser requests only.
+- Rate limited by IP.
 
-MIT License — free to use, modify and distribute.
+### `POST /api/speaking`
 
-Built with ❤️ for IELTS students across South Asia.
+Returns IELTS speaking transcript and band feedback.
+
+Form data:
+
+- `audio`: WebM, OGG, MP4, MPEG, or WAV audio up to 10 MB.
+
+### `GET /api/scores`
+
+Returns saved scores for the signed-in user.
+
+Query:
+
+- `limit`: optional, defaults to 50, maximum 100.
+
+### `POST /api/scores`
+
+Saves a score for the signed-in user. Requires Clerk and `DATABASE_URL`.
+
+Body:
+
+```json
+{
+  "module": "writing",
+  "overall": 7,
+  "ta": 7,
+  "cc": 6.5,
+  "lr": 7,
+  "gra": 6.5
+}
+```
+
+Scores must be valid IELTS half-band values from 0 to 9.
+
+### `POST /api/monitoring/web-vitals`
+
+Receives browser Web Vitals when `NEXT_PUBLIC_ENABLE_WEB_VITALS=true`.
+
+## Quality Gates
+
+Run before deployment:
+
+```bash
+npm run typecheck
+npm run lint
+npm test
+npm run build
+```
+
+Run E2E smoke checks against a live local or deployed app:
+
+```bash
+E2E_BASE_URL=http://localhost:3000 npm run test:e2e
+```
+
+Run a small HTTP load check:
+
+```bash
+LOAD_TEST_URL=http://localhost:3000 LOAD_TEST_REQUESTS=100 LOAD_TEST_CONCURRENCY=10 npm run load:test
+```
+
+## Deployment
+
+1. Add all production environment variables to your deployment platform.
+2. Use PostgreSQL for `DATABASE_URL`; SQLite URLs such as `file:` are not valid for this schema.
+3. Run `npm run db:deploy` during deployment or as a pre-release migration job.
+4. Ensure Clerk production domains include the deployed domain.
+5. Set `NEXT_PUBLIC_APP_URL` to the final HTTPS origin.
+6. Enable Web Vitals reporting only after a log sink is configured.
+
+## Security Notes
+
+- API POST routes enforce same-origin checks and IP-based rate limits.
+- Security headers are configured in `next.config.ts`.
+- Clerk protects AI and score routes when Clerk keys are present.
+- Secrets must remain in environment variables, not source files.
+- Gemini failures return API errors when configured, rather than silently returning mock scores.
+
+## Production Checklist
+
+- `npm ci` succeeds in CI.
+- `npx prisma validate` succeeds with a PostgreSQL `DATABASE_URL`.
+- `npm run typecheck`, `npm run lint`, `npm test`, and `npm run build` pass.
+- E2E smoke tests pass against the deployed URL.
+- Database migrations have been applied.
+- Clerk production keys and allowed domains are configured.
+- Monitoring logs are connected to a production sink.
+- Load test latency and error rate are acceptable for the expected launch traffic.

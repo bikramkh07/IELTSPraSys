@@ -1,10 +1,22 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, type NextRequest } from 'next/server';
 import { gemini, hasGeminiKey } from '@/lib/gemini';
 import { requireAuth } from '@/lib/api-auth';
 import { parseWritingFeedback, type WritingFeedback } from '@/lib/api-response';
+import {
+  createRateLimiter,
+  enforceSameOrigin,
+  readJsonBody,
+  withTimeout,
+} from '@/lib/api-security';
+import { logger } from '@/lib/logger';
+import { validateWritingPayload } from '@/lib/validators';
 
-const MAX_ESSAY_CHARS = 12_000;
-const MAX_PROMPT_CHARS = 2_000;
+const AI_TIMEOUT_MS = 25_000;
+const limitWritingRequests = createRateLimiter({
+  keyPrefix: 'writing',
+  windowMs: 10 * 60 * 1000,
+  max: 10,
+});
 
 const MOCK_RESPONSE: WritingFeedback = {
   ta: 6.5,
@@ -18,27 +30,23 @@ const MOCK_RESPONSE: WritingFeedback = {
   mock: true,
 };
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+  const originError = enforceSameOrigin(req);
+  if (originError) return originError;
+
+  const rateLimited = limitWritingRequests(req);
+  if (rateLimited) return rateLimited;
+
   const authResult = await requireAuth();
   if ('error' in authResult) return authResult.error;
 
   try {
-    const { essay, prompt } = await req.json();
+    const json = await readJsonBody(req);
+    if (!json.ok) return json.response;
 
-    if (typeof essay !== 'string' || typeof prompt !== 'string') {
-      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
-    }
-
-    if (essay.length > MAX_ESSAY_CHARS || prompt.length > MAX_PROMPT_CHARS) {
-      return NextResponse.json({ error: 'Essay or prompt too long' }, { status: 413 });
-    }
-
-    const wordCount = essay.trim() ? essay.trim().split(/\s+/).length : 0;
-    if (wordCount < 50) {
-      return NextResponse.json(
-        { error: 'Essay must be at least 50 words' },
-        { status: 400 },
-      );
+    const validation = validateWritingPayload(json.data);
+    if (!validation.ok) {
+      return NextResponse.json({ error: validation.error }, { status: validation.status });
     }
 
     if (!hasGeminiKey) {
@@ -46,14 +54,16 @@ export async function POST(req: Request) {
     }
 
     const model = gemini.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    const { essay, prompt, wordCount } = validation.data;
 
-    const result = await model.generateContent({
-      contents: [
-        {
-          role: 'user',
-          parts: [
-            {
-              text: `You are an expert IELTS Examiner. Score this essay on Task Achievement, Coherence & Cohesion, Lexical Resource, and Grammatical Range & Accuracy.
+    const result = await withTimeout(
+      model.generateContent({
+        contents: [
+          {
+            role: 'user',
+            parts: [
+              {
+                text: `You are an expert IELTS Examiner. Score this essay on Task Achievement, Coherence & Cohesion, Lexical Resource, and Grammatical Range & Accuracy.
 
 Each score should be a float like 6.0 or 6.5.
 
@@ -63,19 +73,30 @@ Return ONLY valid JSON with this exact structure (no markdown, no code fences):
 IELTS Writing Prompt: ${prompt}
 
 Student Essay: ${essay}`,
-            },
-          ],
+              },
+            ],
+          },
+        ],
+        generationConfig: {
+          responseMimeType: 'application/json',
         },
-      ],
-      generationConfig: {
-        responseMimeType: 'application/json',
-      },
-    });
+      }),
+      AI_TIMEOUT_MS,
+      'Writing feedback',
+    );
 
     const text = result.response.text();
+    logger.info('Writing feedback generated', {
+      userId: authResult.userId,
+      wordCount,
+      mock: false,
+    });
     return NextResponse.json(parseWritingFeedback(JSON.parse(text)));
   } catch (error) {
-    console.error('Writing API error:', error);
-    return NextResponse.json(MOCK_RESPONSE);
+    logger.error('Writing API error', error, { userId: authResult.userId });
+    return NextResponse.json(
+      { error: 'Unable to generate writing feedback right now' },
+      { status: 502 },
+    );
   }
 }

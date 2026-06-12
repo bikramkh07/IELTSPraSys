@@ -47,7 +47,7 @@ export default function ReadingGTModule() {
   };
 
   return (
-    <div className="tab-content active" id="tab-reading-gt" role="tabpanel">
+    <div className="tab-content active" id="panel-reading-gt" role="tabpanel">
       <div className="reading-wrap">
         <div className="reading-header">
           <div>
@@ -56,7 +56,7 @@ export default function ReadingGTModule() {
           </div>
           <div className="reading-controls">
             <div className="reading-timer" style={{ color: seconds < 180 ? 'var(--coral)' : 'var(--gold)' }}>{timeStr}</div>
-            <button className="btn-reading-ctrl" onClick={() => showToast('Passage options menu...')}><i className="ti ti-dots" /></button>
+            <button type="button" className="btn-reading-ctrl" aria-label="Open passage options" onClick={() => showToast('Passage options menu...')}><i className="ti ti-dots" aria-hidden="true" /></button>
           </div>
         </div>
         <div className="reading-layout">
@@ -88,10 +88,13 @@ export default function ReadingGTModule() {
                           const selectedClass = isSelected ? (isCorrect ? ' selected-correct' : ' selected-wrong') : '';
                           return (
                             <button
+                              type="button"
                               key={opt}
                               className={`rq-btn ${btnClass}${selectedClass}`}
                               onClick={() => answerQ(q.num, opt)}
-                              style={{ opacity: answered && !isSelected ? 0.5 : 1, pointerEvents: answered ? 'none' : 'auto' }}
+                              disabled={answered}
+                              aria-pressed={isSelected}
+                              style={{ opacity: answered && !isSelected ? 0.5 : 1 }}
                             >
                               {opt === 'NG' ? 'NOT GIVEN' : opt}
                             </button>
@@ -109,13 +112,13 @@ export default function ReadingGTModule() {
               })}
             </div>
             {Object.keys(answers).length >= 2 && !showScore && (
-              <button className="btn-check-reading" onClick={checkAnswers}><i className="ti ti-check" /> Check My Answers</button>
+              <button type="button" className="btn-check-reading" onClick={checkAnswers}><i className="ti ti-check" aria-hidden="true" /> Check My Answers</button>
             )}
             {showScore && (
               <div className="reading-score-panel">
                 <div className="rsp-score"><span>{correctCount}</span>/5 correct</div>
                 <div className="rsp-band">Estimated band for this section: <strong>{READING_BAND[correctCount] || '4.0'}</strong></div>
-                <button className="btn-next-passage" onClick={() => showToast('Loading next section...')}>Next Section →</button>
+                <button type="button" className="btn-next-passage" onClick={() => showToast('Loading next section...')}>Next Section →</button>
               </div>
             )}
           </div>

@@ -9,7 +9,6 @@ const NAV_ITEMS = [
   { href: '/features', label: 'Features' },
   { href: '/practice', label: 'Practice' },
   { href: '/mock-test', label: 'Mock Test' },
-  { href: '/progress', label: 'Progress' },
   { href: '/reviews', label: 'Reviews' },
 ] as const;
 
@@ -31,14 +30,17 @@ export default function Navbar() {
   return (
     <>
       <nav id="navbar" className={scrolled ? 'scrolled' : ''}>
-        <Link href="/" className="nav-logo">IELTS UP</Link>
+        <Link href="/" className="nav-logo">IELTSPracSYS</Link>
         <button
           className="nav-hamburger"
           id="hamburger"
           aria-label="Toggle menu"
+          aria-expanded={mobileOpen}
+          aria-controls="navLinks"
+          type="button"
           onClick={() => setMobileOpen(!mobileOpen)}
         >
-          <i className={mobileOpen ? 'ti ti-x' : 'ti ti-menu-2'} />
+          <i className={mobileOpen ? 'ti ti-x' : 'ti ti-menu-2'} aria-hidden="true" />
         </button>
         <div className={`nav-links${mobileOpen ? ' open' : ''}`} id="navLinks">
           {NAV_ITEMS.map(({ href, label }) => (
